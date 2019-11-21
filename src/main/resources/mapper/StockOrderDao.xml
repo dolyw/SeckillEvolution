@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="com.example.dao.StockOrderDao">
+
+	<resultMap id="stockOrderResultMap" type="com.example.dto.custom.StockOrderDto">
+        <id property="id" column="id" jdbcType="INTEGER"></id>
+        <result property="stockId" column="stock_id" jdbcType="INTEGER"></result>
+        <result property="name" column="name" jdbcType="VARCHAR"></result>
+        <result property="createTime" column="create_time" jdbcType="TIMESTAMP"></result>
+	</resultMap>
+
+	<sql id="stockOrderAliasColumns">
+		g.id AS id,
+		g.stock_id AS stockId,
+		g.name AS name,
+		g.create_time AS createTime
+	</sql>
+
+	<select id="findPageInfo" resultType="com.example.dto.custom.StockOrderDto">
+		SELECT
+			g.id AS id,
+			g.stock_id AS stockId,
+			g.name AS name,
+			g.create_time AS createTime
+		FROM
+			t_seckill_stock_order g
+		<where>
+			1 = 1
+			<if test="id != null and id != ''">
+			AND	g.id = #{id}
+			</if>
+			<if test="stockId != null and stockId != ''">
+			AND	g.stock_id = #{stockId}
+			</if>
+			<if test="name != null and name != ''">
+			AND	g.name = #{name}
+			</if>
+			<if test="createTime != null and createTime != ''">
+			AND	g.create_time = #{createTime}
+			</if>
+		</where>
+	</select>
+
+</mapper>

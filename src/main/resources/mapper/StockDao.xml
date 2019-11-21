@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="com.example.dao.StockDao">
+
+	<resultMap id="stockResultMap" type="com.example.dto.custom.StockDto">
+        <id property="id" column="id" jdbcType="INTEGER"></id>
+        <result property="name" column="name" jdbcType="VARCHAR"></result>
+        <result property="count" column="count" jdbcType="INTEGER"></result>
+        <result property="sale" column="sale" jdbcType="INTEGER"></result>
+        <result property="version" column="version" jdbcType="INTEGER"></result>
+        <result property="createTime" column="create_time" jdbcType="TIMESTAMP"></result>
+        <result property="updateTime" column="update_time" jdbcType="TIMESTAMP"></result>
+	</resultMap>
+
+	<sql id="stockAliasColumns">
+		g.id AS id,
+		g.name AS name,
+		g.count AS count,
+		g.sale AS sale,
+		g.version AS version,
+		g.create_time AS createTime,
+		g.update_time AS updateTime
+	</sql>
+
+	<select id="findPageInfo" resultType="com.example.dto.custom.StockDto">
+		SELECT
+			g.id AS id,
+			g.name AS name,
+			g.count AS count,
+			g.sale AS sale,
+			g.version AS version,
+			g.create_time AS createTime,
+			g.update_time AS updateTime
+		FROM
+			t_seckill_stock g
+		<where>
+			1 = 1
+			<if test="id != null and id != ''">
+			AND	g.id = #{id}
+			</if>
+			<if test="name != null and name != ''">
+			AND	g.name = #{name}
+			</if>
+			<if test="count != null and count != ''">
+			AND	g.count = #{count}
+			</if>
+			<if test="sale != null and sale != ''">
+			AND	g.sale = #{sale}
+			</if>
+			<if test="version != null and version != ''">
+			AND	g.version = #{version}
+			</if>
+			<if test="createTime != null and createTime != ''">
+			AND	g.create_time = #{createTime}
+			</if>
+			<if test="updateTime != null and updateTime != ''">
+			AND	g.update_time = #{updateTime}
+			</if>
+		</where>
+	</select>
+
+</mapper>
