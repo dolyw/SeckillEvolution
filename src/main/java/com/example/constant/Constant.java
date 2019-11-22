@@ -34,8 +34,23 @@ public interface Constant {
     String PREFIX_EXAMPLE = "example:";
 
     /**
-     * 初始化卖出数量，乐观锁版本
+     * 商品名称
      */
     String ITEM_STOCK_NAME = "OnePlus 7 Pro";
+
+    /**
+     * redis-key-前缀-count-库存
+     */
+    String PREFIX_COUNT = "stock:count:";
+
+    /**
+     * redis-key-前缀-sale-已售
+     */
+    String PREFIX_SALE = "stock:sale:";
+
+    /**
+     * redis-key-前缀-version-乐观锁版本
+     */
+    String PREFIX_VERSION = "stock:version:";
 
 }

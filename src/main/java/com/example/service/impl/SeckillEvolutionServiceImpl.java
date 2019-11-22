@@ -25,15 +25,29 @@ import org.springframework.transaction.annotation.Transactional;
 public class SeckillEvolutionServiceImpl implements ISeckillEvolutionService {
 
     /**
-     * 传统方式(名称注入SeckillTraditionServiceImpl)
+     * 传统方式(名称注入)
      */
     @Autowired
     @Qualifier("seckillTraditionService")
     private ISeckillService seckillTraditionService;
 
+    /**
+     * 乐观锁方式(名称注入)
+     */
+    @Autowired
+    @Qualifier("seckillOptimisticLockService")
+    private ISeckillService seckillOptimisticLockServiceImpl;
+
+    /**
+     * 乐观锁加缓存方法(名称注入)，线程安全
+     */
+    @Autowired
+    @Qualifier("seckillOptimisticLockRedisSafeService")
+    private ISeckillService seckillOptimisticLockRedisSafeService;
+
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Integer createWrongOrder(Integer id) {
+    public Integer createWrongOrder(Integer id) throws Exception {
         // 检查库存
         StockDto stockDto = seckillTraditionService.checkStock(id);
         // 扣库存
@@ -43,6 +57,44 @@ public class SeckillEvolutionServiceImpl implements ISeckillEvolutionService {
         }
         // 下订单
         Integer orderCount = seckillTraditionService.createOrder(stockDto);
+        if (saleCount <= 0) {
+            throw new CustomException("下订单失败");
+        }
+        return orderCount;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Integer createOptimisticLockOrder(Integer id) throws Exception {
+        // 检查库存
+        StockDto stockDto = seckillOptimisticLockServiceImpl.checkStock(id);
+        Thread.sleep(10);
+        // 扣库存
+        Integer saleCount = seckillOptimisticLockServiceImpl.saleStock(stockDto);
+        if (saleCount <= 0) {
+            throw new CustomException("扣库存失败");
+        }
+        // 下订单
+        Integer orderCount = seckillOptimisticLockServiceImpl.createOrder(stockDto);
+        if (saleCount <= 0) {
+            throw new CustomException("下订单失败");
+        }
+        return orderCount;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Integer createOptimisticLockOrderWithRedis(Integer id) throws Exception {
+        // 检查库存
+        StockDto stockDto = seckillOptimisticLockRedisSafeService.checkStock(id);
+        // 扣库存
+        Integer saleCount = seckillOptimisticLockRedisSafeService.saleStock(stockDto);
+        if (saleCount <= 0) {
+            throw new CustomException("扣库存失败");
+        }
+        Thread.sleep(10);
+        // 下订单
+        Integer orderCount = seckillOptimisticLockRedisSafeService.createOrder(stockDto);
         if (saleCount <= 0) {
             throw new CustomException("下订单失败");
         }

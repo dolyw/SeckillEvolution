@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -69,6 +70,23 @@ public class JedisUtil {
     }
 
     /**
+     * 批量获取redis键值
+     *
+     * @param keys
+     * @return java.lang.String
+     * @throws
+     * @author wliduo[i@dolyw.com]
+     * @date 2019/11/14 16:45
+     */
+    public static List<String> mget(String... keys) {
+        try (Jedis jedis = jedisPool.getResource()) {
+            return jedis.mget(keys);
+        } catch (Exception e) {
+            throw new CustomException("获取Redis键值mget方法异常:key=" + keys + " cause=" + e.getMessage());
+        }
+    }
+
+    /**
      * 设置redis键值
      *
      * @param key
@@ -83,6 +101,23 @@ public class JedisUtil {
             return jedis.set(key, value);
         } catch (Exception e) {
             throw new CustomException("设置Redis键值set方法异常:key=" + key + " value=" + value + " cause=" + e.getMessage());
+        }
+    }
+
+    /**
+     * 批量设置redis键值
+     *
+     * @param keysvalues
+     * @return java.lang.String
+     * @throws
+     * @author wliduo[i@dolyw.com]
+     * @date 2019/11/14 16:45
+     */
+    public static String mset(String... keysvalues) {
+        try (Jedis jedis = jedisPool.getResource()) {
+            return jedis.mset(keysvalues);
+        } catch (Exception e) {
+            throw new CustomException("设置Redis键值set方法异常:keysvalues=" + keysvalues + " cause=" + e.getMessage());
         }
     }
 

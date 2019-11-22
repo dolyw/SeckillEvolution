@@ -24,7 +24,7 @@ public interface ISeckillService {
      * @author wliduo[i@dolyw.com]
      * @date 2019/11/20 20:22
      */
-    StockDto checkStock(Integer id);
+    StockDto checkStock(Integer id) throws Exception;
 
     /**
      * 扣库存
@@ -35,7 +35,7 @@ public interface ISeckillService {
      * @author wliduo[i@dolyw.com]
      * @date 2019/11/20 20:24
      */
-    Integer saleStock(StockDto stockDto);
+    Integer saleStock(StockDto stockDto) throws Exception;
 
     /**
      * 下订单

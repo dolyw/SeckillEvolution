@@ -28,4 +28,18 @@ public interface StockDao extends Mapper<StockDto> {
      */
     public List<StockDto> findPageInfo(StockDto stockDto);
 
+    /**
+     * 乐观锁更新扣减库存
+     *
+     * @param stockDto
+     * @return int
+     * @throws
+     * @author wliduo[i@dolyw.com]
+     * @date 2019/11/22 14:14
+     */
+    @Update("UPDATE t_seckill_stock SET count = count - 1, sale = sale + 1, version = version + 1 " +
+            "WHERE id = #{id, jdbcType = INTEGER} AND version = #{version, jdbcType = INTEGER} " +
+            "")
+    int updateByOptimisticLock(StockDto stockDto);
+
 }

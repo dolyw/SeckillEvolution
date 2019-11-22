@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * Redis悲观锁和乐观锁
+ * Redis悲观锁和乐观锁测试
  *
  * @author wliduo[i@dolyw.com]
  * @date 2019/1/24 19:27

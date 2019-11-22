@@ -3,11 +3,13 @@ package com.example.controller;
 import com.example.common.ResponseBean;
 import com.example.constant.Constant;
 import com.example.dto.custom.StockDto;
+import com.example.dto.custom.StockOrderDto;
 import com.example.exception.CustomException;
 import com.example.seckill.ISeckillService;
 import com.example.service.ISeckillEvolutionService;
 import com.example.service.IStockOrderService;
 import com.example.service.IStockService;
+import com.example.util.JedisUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,15 +64,15 @@ public class SeckillEvolutionController {
     /**
      * 初始化库存数量
      *
-     * @param
-     * @return java.lang.String
+     * @param id 商品ID
+     * @return com.example.common.ResponseBean
      * @throws
      * @author wliduo[i@dolyw.com]
-     * @date 2019/11/14 16:56
+     * @date 2019/11/22 15:59
      */
     @PutMapping("/init/{id}")
     public ResponseBean init(@PathVariable("id") Integer id) {
-        // 更新库存表
+        // 更新库存表该商品的库存，已售，乐观锁版本号
         StockDto stockDto = new StockDto();
         stockDto.setId(id);
         stockDto.setName(Constant.ITEM_STOCK_NAME);
@@ -78,9 +80,30 @@ public class SeckillEvolutionController {
         stockDto.setSale(ITEM_STOCK_SALE);
         stockDto.setVersion(ITEM_STOCK_SALE);
         stockService.updateByPrimaryKey(stockDto);
-        // 删除订单表所有数据
-        stockOrderService.delete(null);
+        // 删除订单表该商品所有数据
+        StockOrderDto stockOrderDto = new StockOrderDto();
+        stockOrderDto.setStockId(id);
+        stockOrderService.delete(stockOrderDto);
         return new ResponseBean(HttpStatus.OK.value(), "初始化库存成功", null);
+    }
+
+    /**
+     * 缓存预热
+     *
+     * @param id 商品ID
+     * @return com.example.common.ResponseBean
+     * @throws
+     * @author wliduo[i@dolyw.com]
+     * @date 2019/11/22 15:59
+     */
+    @PutMapping("/initCache/{id}")
+    public ResponseBean initCache(@PathVariable("id") Integer id) {
+        StockDto stockDto = stockService.selectByPrimaryKey(id);
+        // 商品缓存预热
+        JedisUtil.set(Constant.PREFIX_COUNT + id.toString(), stockDto.getCount().toString());
+        JedisUtil.set(Constant.PREFIX_SALE + id.toString(), stockDto.getSale().toString());
+        JedisUtil.set(Constant.PREFIX_VERSION + id.toString(), stockDto.getVersion().toString());
+        return new ResponseBean(HttpStatus.OK.value(), "缓存预热成功", null);
     }
 
     /**
@@ -88,7 +111,7 @@ public class SeckillEvolutionController {
      *
      * @param id 商品ID
      * @return com.example.common.ResponseBean
-     * @throws
+     * @throws Exception
      * @author wliduo[i@dolyw.com]
      * @date 2019/11/21 19:50
      */
@@ -96,6 +119,36 @@ public class SeckillEvolutionController {
     public ResponseBean createWrongOrder(@PathVariable("id") Integer id) throws Exception {
         Integer orderCount = seckillEvolutionService.createWrongOrder(id);
         return new ResponseBean(HttpStatus.OK.value(), "购买成功", orderCount);
+    }
+
+    /**
+     * 使用乐观锁下订单
+     *
+     * @param id 商品ID
+     * @return com.example.common.ResponseBean
+     * @throws Exception
+     * @author wliduo[i@dolyw.com]
+     * @date 2019/11/22 14:24
+     */
+    @PostMapping("/createOptimisticLockOrder/{id}")
+    public ResponseBean createOptimisticLockOrder(@PathVariable("id") Integer id) throws Exception {
+        Integer orderCount = seckillEvolutionService.createOptimisticLockOrder(id);
+        return new ResponseBean(HttpStatus.OK.value(), "购买成功", orderCount);
+    }
+
+    /**
+     * 使用乐观锁下订单，并且添加读缓存，性能提升
+     *
+     * @param id 商品ID
+     * @return com.example.common.ResponseBean
+     * @throws Exception
+     * @author wliduo[i@dolyw.com]
+     * @date 2019/11/22 14:24
+     */
+    @PostMapping("/createOptimisticLockOrderWithRedis/{id}")
+    public ResponseBean createOptimisticLockOrderWithRedis(@PathVariable("id") Integer id) throws Exception {
+        Integer orderCount = seckillEvolutionService.createOptimisticLockOrderWithRedis(id);
+        return new ResponseBean(HttpStatus.OK.value(), "购买成功", null);
     }
 
 }
