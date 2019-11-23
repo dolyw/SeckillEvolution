@@ -29,13 +29,13 @@ import java.util.List;
  * @author wliduo[i@dolyw.com]
  * @date 2019-11-20 18:03:33
  */
-@Service("seckillOptimisticLockRedisService")
-public class SeckillOptimisticLockRedisServiceImpl implements ISeckillService {
+@Service("seckillOptimisticLockRedisWrongService")
+public class SeckillOptimisticLockRedisWrongServiceImpl implements ISeckillService {
 
     /**
      * logger
      */
-    private static final Logger logger = LoggerFactory.getLogger(SeckillOptimisticLockRedisServiceImpl.class);
+    private static final Logger logger = LoggerFactory.getLogger(SeckillOptimisticLockRedisWrongServiceImpl.class);
 
     @Autowired
     private StockDao stockDao;
@@ -45,11 +45,14 @@ public class SeckillOptimisticLockRedisServiceImpl implements ISeckillService {
 
     @Override
     public StockDto checkStock(Integer id) throws Exception {
-        // 使用缓存读取库存，减轻DB压力
+        // 使用缓存读取库存，减轻DB压力，这里会出现数据不一致
         Integer count = Integer.parseInt(JedisUtil.get(Constant.PREFIX_COUNT + id));
         Thread.sleep(100);
         Integer sale = Integer.parseInt(JedisUtil.get(Constant.PREFIX_SALE + id));
         Thread.sleep(100);
+        // 第一个线程和第二个线程同时读取缓存count时，都读取到10，然后第二个线程暂停了，第一个线程继续执行，
+        // 读取的version版本号为0，继续执行到已经秒杀完成，更新缓存(version版本号加一，变成1)，
+        // 现在第二个线程才恢复继续执行，结果读取缓存version版本号为1(本来应该也是0)
         Integer version = Integer.parseInt(JedisUtil.get(Constant.PREFIX_VERSION + id));
         if (count > 0) {
             // 还有库存

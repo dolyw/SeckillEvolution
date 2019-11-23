@@ -16,8 +16,8 @@ CREATE TABLE `t_seckill_stock` (
   `update_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin COMMENT='库存表';
---- 插入一条商品，初始化50个库存
-INSERT INTO `t_seckill_stock` (`count`, `sale`, `version`) VALUES ('50', '0', '0');
+--- 插入一条商品，初始化10个库存
+INSERT INTO `t_seckill_stock` (`count`, `sale`, `version`) VALUES ('10', '0', '0');
 --- 创建库存订单表
 DROP TABLE IF EXISTS `t_seckill_stock_order`;
 CREATE TABLE `t_seckill_stock_order` (

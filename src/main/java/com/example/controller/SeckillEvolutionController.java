@@ -54,7 +54,7 @@ public class SeckillEvolutionController {
     /**
      * 初始化库存数量
      */
-    private static final Integer ITEM_STOCK_COUNT = 50;
+    private static final Integer ITEM_STOCK_COUNT = 10;
 
     /**
      * 初始化卖出数量，乐观锁版本
@@ -147,7 +147,10 @@ public class SeckillEvolutionController {
      */
     @PostMapping("/createOptimisticLockOrderWithRedis/{id}")
     public ResponseBean createOptimisticLockOrderWithRedis(@PathVariable("id") Integer id) throws Exception {
-        Integer orderCount = seckillEvolutionService.createOptimisticLockOrderWithRedis(id);
+        // 错误的，线程不安全
+        // Integer orderCount = seckillEvolutionService.createOptimisticLockOrderWithRedisWrong(id);
+        // 正确的，线程安全
+        Integer orderCount = seckillEvolutionService.createOptimisticLockOrderWithRedisSafe(id);
         return new ResponseBean(HttpStatus.OK.value(), "购买成功", null);
     }
 

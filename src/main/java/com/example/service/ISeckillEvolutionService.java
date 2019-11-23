@@ -37,7 +37,7 @@ public interface ISeckillEvolutionService {
     Integer createOptimisticLockOrder(Integer id) throws Exception;
 
     /**
-     * 使用乐观锁创建订单(解决卖超问题)，加缓存读，提升性能
+     * 使用乐观锁创建订单(解决卖超问题)，加缓存读(线程不安全)，提升性能，
      *
      * @param id
      * @return java.lang.Integer
@@ -45,6 +45,17 @@ public interface ISeckillEvolutionService {
      * @author wliduo[i@dolyw.com]
      * @date 2019/11/22 14:21
      */
-    Integer createOptimisticLockOrderWithRedis(Integer id) throws Exception;
+    Integer createOptimisticLockOrderWithRedisWrong(Integer id) throws Exception;
+
+    /**
+     * 使用乐观锁创建订单(解决卖超问题)，加缓存读(线程安全)，提升性能，
+     *
+     * @param id
+     * @return java.lang.Integer
+     * @throws Exception
+     * @author wliduo[i@dolyw.com]
+     * @date 2019/11/22 14:21
+     */
+    Integer createOptimisticLockOrderWithRedisSafe(Integer id) throws Exception;
 
 }

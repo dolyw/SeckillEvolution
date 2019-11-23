@@ -39,6 +39,13 @@ public class SeckillEvolutionServiceImpl implements ISeckillEvolutionService {
     private ISeckillService seckillOptimisticLockServiceImpl;
 
     /**
+     * 乐观锁加缓存方法(名称注入)，线程不安全
+     */
+    @Autowired
+    @Qualifier("seckillOptimisticLockRedisWrongService")
+    private ISeckillService SeckillOptimisticLockRedisWrongServiceImpl;
+
+    /**
      * 乐观锁加缓存方法(名称注入)，线程安全
      */
     @Autowired
@@ -84,7 +91,26 @@ public class SeckillEvolutionServiceImpl implements ISeckillEvolutionService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Integer createOptimisticLockOrderWithRedis(Integer id) throws Exception {
+    public Integer createOptimisticLockOrderWithRedisWrong(Integer id) throws Exception {
+        // 检查库存
+        StockDto stockDto = SeckillOptimisticLockRedisWrongServiceImpl.checkStock(id);
+        // 扣库存
+        Integer saleCount = SeckillOptimisticLockRedisWrongServiceImpl.saleStock(stockDto);
+        if (saleCount <= 0) {
+            throw new CustomException("扣库存失败");
+        }
+        Thread.sleep(10);
+        // 下订单
+        Integer orderCount = SeckillOptimisticLockRedisWrongServiceImpl.createOrder(stockDto);
+        if (saleCount <= 0) {
+            throw new CustomException("下订单失败");
+        }
+        return orderCount;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Integer createOptimisticLockOrderWithRedisSafe(Integer id) throws Exception {
         // 检查库存
         StockDto stockDto = seckillOptimisticLockRedisSafeService.checkStock(id);
         // 扣库存
@@ -98,6 +124,7 @@ public class SeckillEvolutionServiceImpl implements ISeckillEvolutionService {
         if (saleCount <= 0) {
             throw new CustomException("下订单失败");
         }
+        Thread.sleep(10);
         return orderCount;
     }
 }
