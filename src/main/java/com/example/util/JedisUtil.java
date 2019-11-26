@@ -260,4 +260,27 @@ public class JedisUtil {
             throw new CustomException("获取Redis键过期剩余时间ttl方法异常:key=" + key + " cause=" + e.getMessage());
         }
     }
+
+    /**
+     * 脚本执行
+     *
+     * @param script
+	 * @param keys
+	 * @param args
+     * @return java.lang.Long
+     * @throws
+     * @author wliduo[i@dolyw.com]
+     * @date 2019/11/25 16:50
+     */
+    public static Object eval(String script, List<String> keys, List<String> args) {
+        Object result = null;
+        try (Jedis jedis = jedisPool.getResource()) {
+            result = jedis.eval(script, keys, args);
+            return result;
+        } catch (Exception e) {
+            throw new CustomException("Redis脚本执行eval方法异常:script=" + script + " keys=" +
+                    keys.toString() + " args=" + args.toString() + " cause=" + e.getMessage());
+        }
+    }
+
 }

@@ -17,7 +17,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Redis悲观锁和乐观锁测试
  *
  * @author wliduo[i@dolyw.com]
- * @date 2019/1/24 19:27
+ * @date 2019/11/13 19:27
  */
 @RestController
 @RequestMapping("/redis")
