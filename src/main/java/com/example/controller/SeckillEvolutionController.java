@@ -5,11 +5,13 @@ import com.example.constant.Constant;
 import com.example.dto.custom.StockDto;
 import com.example.dto.custom.StockOrderDto;
 import com.example.exception.CustomException;
+import com.example.limit.Limit;
 import com.example.seckill.ISeckillService;
 import com.example.service.ISeckillEvolutionService;
 import com.example.service.IStockOrderService;
 import com.example.service.IStockService;
 import com.example.util.JedisUtil;
+import com.example.util.RedisLimitUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,6 +62,12 @@ public class SeckillEvolutionController {
      * 初始化卖出数量，乐观锁版本
      */
     private static final Integer ITEM_STOCK_SALE = 0;
+
+    /**
+     * RedisLimitUtil
+     */
+    @Autowired
+    private RedisLimitUtil redisLimitUtil;
 
     /**
      * 初始化库存数量
@@ -147,6 +155,25 @@ public class SeckillEvolutionController {
      */
     @PostMapping("/createOptimisticLockOrderWithRedis/{id}")
     public ResponseBean createOptimisticLockOrderWithRedis(@PathVariable("id") Integer id) throws Exception {
+        // 错误的，线程不安全
+        // Integer orderCount = seckillEvolutionService.createOptimisticLockOrderWithRedisWrong(id);
+        // 正确的，线程安全
+        Integer orderCount = seckillEvolutionService.createOptimisticLockOrderWithRedisSafe(id);
+        return new ResponseBean(HttpStatus.OK.value(), "购买成功", null);
+    }
+
+    /**
+     * 使用乐观锁下订单，并且添加读缓存，再添加限流
+     *
+     * @param id 商品ID
+     * @return com.example.common.ResponseBean
+     * @throws Exception
+     * @author wliduo[i@dolyw.com]
+     * @date 2019/11/22 14:24
+     */
+    @Limit
+    @PostMapping("/createOptimisticLockOrderWithRedisLimit/{id}")
+    public ResponseBean createOptimisticLockOrderWithRedisLimit(@PathVariable("id") Integer id) throws Exception {
         // 错误的，线程不安全
         // Integer orderCount = seckillEvolutionService.createOptimisticLockOrderWithRedisWrong(id);
         // 正确的，线程安全

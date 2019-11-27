@@ -14,12 +14,6 @@ import java.lang.annotation.*;
 public @interface Limit {
 
     /**
-     * Lua脚本位置
-     * @return
-     */
-    String path() default "redis/limit-custom.lua";
-
-    /**
      * 限流最大请求数
      * @return
      */
@@ -29,6 +23,6 @@ public @interface Limit {
      * 一个时间窗口(毫秒)
      * @return
      */
-    String timeRequest() default "3000";
+    String timeRequest() default "1000";
 
 }

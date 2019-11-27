@@ -22,7 +22,14 @@
 * [2. 使用乐观锁](https://note.dolyw.com/seckill-evolution/02-Optimistic-Lock.html)
 * [3. 使用缓存](https://note.dolyw.com/seckill-evolution/03-Optimistic-Lock-Redis.html)
 * [4. 使用分布式限流](https://note.dolyw.com/seckill-evolution/04-Distributed-Limit.html)
-* [5. 使用队列异步下单](https://note.dolyw.com/seckill-evolution/04-Distributed-Limit.html)
+* [5. 使用队列异步下单](https://note.dolyw.com/seckill-evolution/05-MQ-Async.html)
+
+**其他**
+
+* [JMeter的安装使用](https://note.dolyw.com/command/06-JMeter-Install.html)
+* [数据库的那些锁](http://note.dolyw.com/database/01-DB-Lock.html)
+* [Redis与数据库一致性](https://note.dolyw.com/cache/00-DataBaseConsistency.html)
+* [高并发下的限流分析](http://note.dolyw.com/seckill/02-Distributed-Limit.html)
 
 #### 软件架构
 

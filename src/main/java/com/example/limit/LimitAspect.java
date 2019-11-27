@@ -30,6 +30,11 @@ public class LimitAspect {
     private static final Logger logger = LoggerFactory.getLogger(LimitAspect.class);
 
     /**
+     * 一个时间窗口时间(毫秒)(限流时间)
+     */
+    private static final String TIME_REQUEST = "1000";
+
+    /**
      * RedisLimitUtil
      */
     @Autowired
@@ -59,20 +64,24 @@ public class LimitAspect {
     @Around("aspect() && @annotation(limit)")
     public Object Interceptor(ProceedingJoinPoint proceedingJoinPoint, Limit limit) {
         Object result = null;
-        try {
-            // 返回请求数量大于0说明不被限流
-            Long maxRequest = redisLimitUtil.limit(limit.path(), limit.maxRequest(), limit.timeRequest());
-            logger.info(maxRequest.toString());
-            if (maxRequest > 0) {
-                // 放行，执行后续方法
+        Long maxRequest = 0L;
+        // 一个时间窗口(毫秒)为1000的话默认调用秒级限流判断(每秒限制多少请求)
+        if (TIME_REQUEST.equals(limit.timeRequest())) {
+            maxRequest = redisLimitUtil.limit(limit.maxRequest());
+        } else {
+            maxRequest = redisLimitUtil.limit(limit.maxRequest(), limit.timeRequest());
+        }
+        // 返回请求数量大于0说明不被限流
+        if (maxRequest > 0) {
+            // 放行，执行后续方法
+            try {
                 result = proceedingJoinPoint.proceed();
-            } else {
-                // 直接返回响应结果
-                return JSON.toJSONString(new ResponseBean(HttpStatus.OK.value(), "请求拥挤，请稍候重试", null));
+            } catch (Throwable throwable) {
+                throw new CustomException(throwable.getMessage());
             }
-        } catch (Throwable throwable) {
-            logger.error(throwable.getMessage());
-            throw new CustomException("限流切面执行出现问题: " + throwable.getMessage());
+        } else {
+            // 直接返回响应结果
+            throw new CustomException("请求拥挤，请稍候重试");
         }
         return result;
     }

@@ -26,17 +26,22 @@ local currentRequest = tonumber(redis.call('get', requestKey) or "0")
 -- 限流开始时间加超时时间戳(限流时间)大于当前请求时间戳
 if currentTime + timeRequest > nowTime then
     -- 判断当前时间窗口请求内是否超过限流最大请求数
-    if currentRequest < maxRequest then
-        -- 在时间窗口内且请求数没超，请求数加一
-        redis.call('set', requestKey, currentRequest + 1)
-        return currentRequest + 1;
-    else
-        -- 在时间窗口内且超过限流最大请求数，不操作
+    if currentRequest + 1 > maxRequest then
+        -- 在时间窗口内且超过限流最大请求数，返回
         return 0;
+    else
+        -- 在时间窗口内且请求数没超，请求数加一
+        redis.call("INCRBY", requestKey, 1)
+        return currentRequest + 1;
     end
 else
     -- 超时后重置，开启一个新的时间窗口
     redis.call('set', timeKey, nowTime)
     redis.call('set', requestKey, '0')
-    return -1;
+    -- 设置过期时间
+    redis.call("EXPIRE", timeKey, timeRequest / 1000)
+    redis.call("EXPIRE", requestKey, timeRequest / 1000)
+    -- 请求数加一
+    redis.call("INCRBY", requestKey, 1)
+    return 1;
 end

@@ -35,7 +35,7 @@ public class LimitController {
     /**
      * 一个时间窗口时间(毫秒)(限流时间)
      */
-    private static final Long TIME_REQUEST = 1000L;
+    private static final Long TIME_REQUEST = 5000L;
 
     /**
      * 一个时间窗口内请求的数量累计(限流请求数累计)
@@ -52,11 +52,6 @@ public class LimitController {
      */
     @Autowired
     private RedisLimitUtil redisLimitUtil;
-
-    /**
-     * 脚本位置
-     */
-    private static final String PATH = "redis/limit-seckill.lua";
 
     /**
      * 计数器(固定时间窗口)请求接口
@@ -84,12 +79,12 @@ public class LimitController {
             requestTime = new AtomicLong(nowTime);
             requestNum = new AtomicInteger(0);
         }
-        logger.info("请求失败，被限流，当前请求是{}次", requestNum.intValue());
-        return "请求失败，被限流，当前请求是" + requestNum.intValue() + "次";
+        logger.info("请求失败，被限流");
+        return "请求失败，被限流";
     }
 
     /**
-     * 计数器(固定时间窗口)请求接口(Redis工具类实现，秒级限流)
+     * 计数器(固定时间窗口)请求接口(限流工具类实现)
      *
      * @param
      * @return java.lang.String
@@ -99,7 +94,7 @@ public class LimitController {
      */
     @GetMapping("/redis")
     public String redis() {
-        Long maxRequest = redisLimitUtil.limit(PATH, MAX_NUM_REQUEST.toString());
+        Long maxRequest = redisLimitUtil.limit(MAX_NUM_REQUEST.toString());
         // 结果请求数大于0说明不被限流
         if (maxRequest > 0) {
             logger.info("请求成功，当前请求是{}次", maxRequest);
@@ -110,7 +105,7 @@ public class LimitController {
     }
 
     /**
-     * 计数器(固定时间窗口)请求接口(Redis自定义注解实现，自定义限流)
+     * 计数器(固定时间窗口)请求接口(限流注解实现)
      *
      * @param
      * @return java.lang.String
@@ -118,7 +113,7 @@ public class LimitController {
      * @author wliduo[i@dolyw.com]
      * @date 2019/11/26 9:46
      */
-    @Limit(path = "redis/limit-custom.lua", maxRequest = "5", timeRequest = "5000")
+    @Limit(maxRequest = "2", timeRequest = "3000")
     @GetMapping("/annotation")
     public String annotation() {
         logger.info("请求成功");
