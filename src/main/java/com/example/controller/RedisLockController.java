@@ -77,6 +77,7 @@ public class RedisLockController {
 
     /**
      * 会出现超卖情况的减少库存方式(典型的读后写，不可重复读)
+     * https://www.jianshu.com/p/380ebb7c0847
      * 两个线程同时读取到库存为10，这样两线程计算写入后库存数值都为9，而卖出的数量为2
      * 就是超卖问题出现了，正常库存应该是8
      *
@@ -104,6 +105,7 @@ public class RedisLockController {
 
     /**
      * 原子的减少库存方式(也会读后写，不可重复读，出现超卖问题)
+     * https://www.jianshu.com/p/380ebb7c0847
      * 三个线程同时读取到库存为1时，这样两线程都穿过了if判断执行了decr操作
      * 而导致卖出数量多2份，且redis存储的库存为-2，原子操作导致减少库存都会执行
      *
